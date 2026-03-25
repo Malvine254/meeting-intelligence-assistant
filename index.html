@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Multi-Agent Meeting Intelligence Assistant</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    :root{
+      --bg: #0b1020;
+      --panel: rgba(17, 24, 39, 0.82);
+      --panel-2: #111827;
+      --card: rgba(255,255,255,0.04);
+      --text: #e5eefc;
+      --muted: #a8b3cf;
+      --line: rgba(255,255,255,0.09);
+      --primary: #60a5fa;
+      --primary-2: #22d3ee;
+      --accent: #8b5cf6;
+      --success: #34d399;
+      --warning: #fbbf24;
+      --shadow: 0 20px 60px rgba(0,0,0,0.35);
+      --radius: 22px;
+      --radius-sm: 16px;
+      --max: 1180px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Inter", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(96,165,250,0.16), transparent 26%),
+        radial-gradient(circle at top right, rgba(139,92,246,0.18), transparent 28%),
+        linear-gradient(180deg, #08101f 0%, #0b1020 100%);
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    a:hover {
+      color: var(--primary-2);
+    }
+
+    .wrap {
+      width: min(var(--max), calc(100% - 32px));
+      margin: 0 auto;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(14px);
+      background: rgba(7, 11, 24, 0.72);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .topbar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 14px 0;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+    }
+
+    .brand-badge {
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+      box-shadow: var(--shadow);
+      font-size: 18px;
+    }
+
+    .nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .nav a {
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .nav a:hover {
+      color: white;
+    }
+
+    .hero {
+      padding: 72px 0 36px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 28px;
+      align-items: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border: 1px solid rgba(96,165,250,0.25);
+      background: rgba(96,165,250,0.08);
+      color: #cce4ff;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0 0 16px;
+      font-size: clamp(36px, 6vw, 64px);
+      line-height: 1.04;
+      letter-spacing: -0.05em;
+    }
+
+    .hero p {
+      font-size: 18px;
+      color: var(--muted);
+      max-width: 760px;
+      margin: 0 0 26px;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 13px 18px;
+      border-radius: 14px;
+      font-weight: 700;
+      transition: 0.25s ease;
+      border: 1px solid transparent;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: white;
+      box-shadow: var(--shadow);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      color: white;
+    }
+
+    .btn-secondary {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+    }
+
+    .btn-secondary:hover {
+      transform: translateY(-2px);
+      border-color: rgba(255,255,255,0.18);
+      color: white;
+    }
+
+    .hero-card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.07), rgba(255,255,255,0.03));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero-card h3 {
+      margin: 0 0 12px;
+      font-size: 18px;
+    }
+
+    .mini-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .mini-item {
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255,255,255,0.03);
+      color: var(--muted);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin: 24px 0 10px;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px;
+      background: rgba(255,255,255,0.03);
+      text-align: center;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 26px;
+      margin-bottom: 6px;
+    }
+
+    .section {
+      padding: 26px 0;
+    }
+
+    .section-head {
+      margin-bottom: 18px;
+    }
+
+    .section-head .kicker {
+      color: var(--primary-2);
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 12px;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+
+    h2 {
+      font-size: clamp(28px, 4vw, 42px);
+      margin: 0 0 10px;
+      letter-spacing: -0.04em;
+    }
+
+    .lead {
+      color: var(--muted);
+      max-width: 850px;
+      margin: 0;
+    }
+
+    .grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .grid-2 {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .grid-3 {
+      grid-template-columns: repeat(3, 1fr);
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .card h3 {
+      margin: 0 0 10px;
+      font-size: 20px;
+      letter-spacing: -0.03em;
+    }
+
+    .card p,
+    .card li {
+      color: var(--muted);
+    }
+
+    .feature-card {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .feature-card::after {
+      content: "";
+      position: absolute;
+      inset: auto -20% -50% auto;
+      width: 180px;
+      height: 180px;
+      background: radial-gradient(circle, rgba(96,165,250,0.15), transparent 70%);
+      pointer-events: none;
+    }
+
+    .pill-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .pill {
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      color: #dbeafe;
+      background: rgba(96,165,250,0.1);
+      border: 1px solid rgba(96,165,250,0.2);
+      font-weight: 600;
+    }
+
+    .video-shell {
+      overflow: hidden;
+      border-radius: 24px;
+      border: 1px solid var(--line);
+      background: #050912;
+      box-shadow: var(--shadow);
+    }
+
+    .video-shell iframe {
+      display: block;
+      width: 100%;
+      height: min(62vw, 640px);
+      border: 0;
+    }
+
+    .code {
+      margin: 0;
+      padding: 18px;
+      border-radius: 18px;
+      background: #07101d;
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #dbeafe;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 14px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .step {
+      display: grid;
+      grid-template-columns: 58px 1fr;
+      gap: 16px;
+      align-items: start;
+      padding: 18px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .step:last-child {
+      border-bottom: 0;
+    }
+
+    .step-no {
+      width: 58px;
+      height: 58px;
+      border-radius: 18px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, rgba(96,165,250,0.18), rgba(139,92,246,0.22));
+      border: 1px solid rgba(255,255,255,0.1);
+      font-weight: 800;
+      font-size: 18px;
+      color: white;
+    }
+
+    .step h4 {
+      margin: 0 0 6px;
+      font-size: 19px;
+    }
+
+    .step p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .callout {
+      padding: 18px 20px;
+      border: 1px solid rgba(52,211,153,0.24);
+      background: rgba(52,211,153,0.08);
+      color: #d1fae5;
+      border-radius: 18px;
+      font-weight: 600;
+    }
+
+    .warn {
+      border: 1px solid rgba(251,191,36,0.24);
+      background: rgba(251,191,36,0.08);
+      color: #fef3c7;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: rgba(255,255,255,0.03);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    th {
+      color: #dbeafe;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      background: rgba(255,255,255,0.03);
+    }
+
+    td {
+      color: var(--muted);
+      vertical-align: top;
+    }
+
+    .footer {
+      padding: 48px 0 70px;
+      text-align: center;
+      color: #8ca0c9;
+      font-size: 14px;
+    }
+
+    @media (max-width: 980px) {
+      .hero-grid,
+      .grid-2,
+      .grid-3,
+      .stats {
+        grid-template-columns: 1fr;
+      }
+
+      .nav {
+        display: none;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .wrap {
+        width: min(var(--max), calc(100% - 20px));
+      }
+
+      .hero {
+        padding-top: 48px;
+      }
+
+      .card,
+      .hero-card {
+        padding: 18px;
+      }
+
+      .step {
+        grid-template-columns: 46px 1fr;
+      }
+
+      .step-no {
+        width: 46px;
+        height: 46px;
+        border-radius: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <div class="brand">
+        <div class="brand-badge">AI</div>
+        <div>Meeting Intelligence Assistant</div>
+      </div>
+
+      <nav class="nav">
+        <a href="#overview">Overview</a>
+        <a href="#features">Features</a>
+        <a href="#architecture">Architecture</a>
+        <a href="#setup">Setup</a>
+        <a href="#run">Run</a>
+        <a href="#troubleshooting">Troubleshooting</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div>
+          <div class="eyebrow">Multi-Agent Orchestration • Microsoft 365 • Teams Toolkit • TypeScript</div>
+          <h1>A modern AI assistant that joins meetings, understands conversations, and takes action automatically.</h1>
+          <p>
+            This project is a real-time, multi-agent meeting intelligence system built in TypeScript for Microsoft Teams.
+            It can check inbox emails, manage calendar activity, join meetings, answer live questions about the conversation,
+            generate meeting minutes, and automatically send follow-up summaries to attendees after the meeting ends.
+          </p>
+
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#setup">Get Started</a>
+            <a class="btn btn-secondary" href="#video">Watch Demo</a>
+          </div>
+
+          <div class="stats">
+            <div class="stat">
+              <strong>5+</strong>
+              Specialized agents
+            </div>
+            <div class="stat">
+              <strong>Live</strong>
+              Meeting reasoning
+            </div>
+            <div class="stat">
+              <strong>M365</strong>
+              Tool integration
+            </div>
+            <div class="stat">
+              <strong>Auto</strong>
+              Minutes and follow-ups
+            </div>
+          </div>
+        </div>
+
+        <aside class="hero-card">
+          <h3>What this assistant can do</h3>
+          <div class="mini-list">
+            <div class="mini-item">Join Microsoft Teams meetings automatically</div>
+            <div class="mini-item">Answer questions like “What did John say?” while the meeting is still going on</div>
+            <div class="mini-item">Check inbox emails and support productivity workflows</div>
+            <div class="mini-item">Generate structured meeting minutes at the end of a call</div>
+            <div class="mini-item">Send follow-up emails to attendees automatically</div>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section" id="video">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="kicker">Demo</div>
+          <h2>Project walkthrough video</h2>
+          <p class="lead">Embed your YouTube demo here after uploading your recording.</p>
+        </div>
+
+        <div class="video-shell">
+          <iframe
+            src="https://www.youtube.com/embed/YOUR_VIDEO_ID"
+            title="Project Demo Video"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen>
+          </iframe>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="overview">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="kicker">Overview</div>
+          <h2>What this project is</h2>
+          <p class="lead">
+            Traditional meeting tools stop at transcription. This project goes further by combining multiple AI agents,
+            Microsoft 365 integrations, and orchestration logic to turn meetings into actionable intelligence.
+          </p>
+        </div>
+
+        <div class="grid grid-2">
+          <div class="card">
+            <h3>The problem</h3>
+            <p>
+              Meetings are where decisions are made, but they are also where context gets lost. Manual notes are inconsistent,
+              action items are forgotten, and following up takes extra time. People often leave a meeting without a clear
+              record of what was decided, who owns what, and what was said.
+            </p>
+          </div>
+
+          <div class="card">
+            <h3>The solution</h3>
+            <p>
+              This assistant acts as a real-time meeting companion and post-meeting automation engine. It listens, understands,
+              retrieves context, summarizes outcomes, and sends follow-up communication automatically so that meetings lead to
+              clear outcomes instead of scattered notes.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="features">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="kicker">Capabilities</div>
+          <h2>Key features</h2>
+          <p class="lead">The system combines meeting intelligence, productivity workflows, and automation into one coordinated experience.</p>
+        </div>
+
+        <div class="grid grid-3">
+          <article class="card feature-card">
+            <h3>Real-time meeting intelligence</h3>
+            <p>Understands live conversation flow and supports contextual questions during the meeting itself.</p>
+            <div class="pill-row">
+              <span class="pill">Live context</span>
+              <span class="pill">Speaker-aware</span>
+              <span class="pill">Fast response</span>
+            </div>
+          </article>
+
+          <article class="card feature-card">
+            <h3>Inbox and calendar productivity</h3>
+            <p>Checks emails, reviews calendar events, and helps prioritize productivity-related tasks using Microsoft 365 tools.</p>
+            <div class="pill-row">
+              <span class="pill">Email access</span>
+              <span class="pill">Calendar access</span>
+              <span class="pill">Task support</span>
+            </div>
+          </article>
+
+          <article class="card feature-card">
+            <h3>Automated meeting minutes</h3>
+            <p>Creates structured notes including decisions, discussion points, owners, and next steps after the meeting ends.</p>
+            <div class="pill-row">
+              <span class="pill">Summaries</span>
+              <span class="pill">Action items</span>
+              <span class="pill">Minutes</span>
+            </div>
+          </article>
+
+          <article class="card feature-card">
+            <h3>Automatic follow-up emails</h3>
+            <p>Sends post-meeting communication to attendees with summaries and action items, reducing manual effort.</p>
+            <div class="pill-row">
+              <span class="pill">Attendee sync</span>
+              <span class="pill">Email automation</span>
+              <span class="pill">Clear outputs</span>
+            </div>
+          </article>
+
+          <article class="card feature-card">
+            <h3>Multi-agent orchestration</h3>
+            <p>Uses specialized agents working together instead of relying on one generic assistant to do everything.</p>
+            <div class="pill-row">
+              <span class="pill">Orchestrator</span>
+              <span class="pill">Delegation</span>
+              <span class="pill">Scalable design</span>
+            </div>
+          </article>
+
+          <article class="card feature-card">
+            <h3>Teams-native workflow</h3>
+            <p>Built around the Microsoft Teams ecosystem using the M365 toolkit and TypeScript for practical enterprise use.</p>
+            <div class="pill-row">
+              <span class="pill">Teams</span>
+              <span class="pill">TypeScript</span>
+              <span class="pill">Microsoft 365</span>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="architecture">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="kicker">Architecture</div>
+          <h2>How the system is structured</h2>
+          <p class="lead">This solution is designed as a coordinated multi-agent system, where each agent focuses on a specific responsibility.</p>
+        </div>
+
+        <div class="card">
+          <div class="step">
+            <div class="step-no">1</div>
+            <div>
+              <h4>Orchestrator Agent</h4>
+              <p>Routes user requests, coordinates the workflow, selects the right specialized agent, and manages overall task execution.</p>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-no">2</div>
+            <div>
+              <h4>Meeting Intelligence Agent</h4>
+              <p>Handles live meeting context, real-time understanding, speaker-related questions, and meeting state awareness.</p>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-no">3</div>
+            <div>
+              <h4>Summarization Agent</h4>
+              <p>Converts raw discussion into clear minutes, decisions, highlights, and action items after the call.</p>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-no">4</div>
+            <div>
+              <h4>Email Agent</h4>
+              <p>Creates and sends follow-up emails to attendees with structured post-meeting outputs.</p>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-no">5</div>
+            <div>
+              <h4>Productivity Agent</h4>
+              <p>Handles inbox checks, calendar lookups, prioritization tasks, and Microsoft 365 productivity actions.</p>
+            </div>
+          </div>
+        </div>
+
+        <div style="height:18px"></div>
+
+        <div class="callout">
+          This design makes the solution more reliable and scalable because each agent is responsible for a focused function instead of sharing one overloaded prompt.
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="repo">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="kicker">Repository</div>
+          <h2>Suggested project structure</h2>
+          <p class="lead">Adjust the folders below to match your actual codebase, but this format works well for a Teams Toolkit TypeScript project.</p>
+        </div>
+
+        <pre class="code">project-root/
+├── src/
+│   ├── agents/
+│   │   ├── orchestrator/
+│   │   ├── meeting-agent/
+│   │   ├── summary-agent/
+│   │   ├── email-agent/
+│   │   └── productivity-agent/
+│   ├── services/
+│   │   ├── graph/
+│   │   ├── meetings/
+│   │   ├── mail/
+│   │   └── calendar/
+│   ├── utils/
+│   ├── config/
+│   └── index.ts
+├── appPackage/
+├── env/
+├── package.json
+├── tsconfig.json
+├── README.md
+└── docs/</pre>
+      </div>
+    </section>
+
+    <section class="section" id="prerequisites">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="kicker">Before you start</div>
+          <h2>Prerequisites</h2>
+          <p class="lead">Make sure the environment below is ready before running the application.</p>
+        </div>
+
+        <div class="grid grid-2">
+          <div class="card">
+            <h3>Development requirements</h3>
+            <ul>
+              <li>Node.js 18 or later</li>
+              <li>npm or pnpm</li>
+              <li>Visual Studio Code</li>
+              <li>Microsoft Teams Toolkit extension</li>
+              <li>Microsoft 365 developer tenant or organization tenant access</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <h3>Cloud and integration requirements</h3>
+            <ul>
+              <li>Microsoft 365 app registration and permissions</li>
+              <li>Teams app configuration</li>
+              <li>Email and calendar access through Microsoft Graph</li>
+              <li>Any AI model or orchestration service your agents depend on</li>
+              <li>Meeting join permissions where applicable</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="setup">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="kicker">Setup</div>
+          <h2>How to configure the project</h2>
+          <p class="lead">Use the steps below as your technical walkthrough section for the buildathon submission.</p>
+        </div>
+
+        <div class="card">
+          <div class="step">
+            <div class="step-no">1</div>
+            <div>
+              <h4>Clone the repository</h4>
+              <p>Pull the project locally so you can install dependencies and configure the environment.</p>
+              <pre class="code">git clone YOUR_REPO_URL
+cd YOUR_PROJECT_FOLDER</pre>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-no">2</div>
+            <div>
+              <h4>Install dependencies</h4>
+              <p>Install all required packages for the Teams app, agent orchestration, and Microsoft 365 integrations.</p>
+              <pre class="code">npm install</pre>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-no">3</div>
+            <div>
+              <h4>Configure environment variables</h4>
+              <p>Create your environment file and add all required keys, IDs, secrets, and configuration values.</p>
+              <pre class="code"># Example .env values
+M365_CLIENT_ID=
+M365_CLIENT_SECRET=
+M365_TENANT_ID=
+TEAMS_APP_ID=
+GRAPH_SCOPES=
+AI_MODEL_ENDPOINT=
+AI_MODEL_KEY=
+EMAIL_SENDER=
+MEETING_SERVICE_CONFIG=</pre>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-no">4</div>
+            <div>
+              <h4>Set up Microsoft 365 and Teams permissions</h4>
+              <p>
+                Make sure the app registration has the permissions required for mail access, calendar access,
+                meeting participation, and any other Microsoft Graph operations your solution uses.
+              </p>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-no">5</div>
+            <div>
+              <h4>Update Teams Toolkit configuration</h4>
+              <p>Verify the Teams app manifest, local environment settings, and any toolkit deployment profiles.</p>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="step-no">6</div>
+            <div>
+              <h4>Start the project</h4>
+              <p>Run the local dev server and launch the Teams app for testing.</p>
+              <pre class="code">npm run dev</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="run">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="kicker">Run flow</div>
+          <h2>How the project works at runtime</h2>
+          <p class="lead">This section explains the end-to-end experience from the moment a meeting starts to the final follow-up email.</p>
+        </div>
+
+        <div class="grid grid-2">
+          <div class="card">
+            <h3>Live meeting flow</h3>
+            <ol>
+              <li>User opens the Teams app or initiates the assistant.</li>
+              <li>The orchestrator agent identifies the request context.</li>
+              <li>The system joins or monitors the active meeting.</li>
+              <li>Meeting intelligence agent listens and tracks live discussion context.</li>
+              <li>The user can ask questions such as who said what during the meeting.</li>
+            </ol>
+          </div>
+
+          <div class="card">
+            <h3>Post-meeting flow</h3>
+            <ol>
+              <li>The meeting ends and the summary workflow is triggered.</li>
+              <li>The summarization agent generates minutes and action items.</li>
+              <li>The email agent prepares a follow-up message.</li>
+              <li>Attendees receive the minutes automatically.</li>
+              <li>The record can be stored or extended into future workflows.</li>
+            </ol>
+          </div>
+        </div>
+
+        <div style="height:18px"></div>
+
+        <div class="callout warn">
+          If your assistant can answer “What did John say?” during the meeting, mention in your video that this is real-time contextual retrieval, not just post-meeting summarization.
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="commands">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="kicker">Commands</div>
+          <h2>Useful development commands</h2>
+          <p class="lead">Replace these with the exact scripts from your package.json if they differ.</p>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Command</th>
+                <th>Purpose</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>npm install</code></td>
+                <td>Installs all project dependencies</td>
+              </tr>
+              <tr>
+                <td><code>npm run dev</code></td>
+                <td>Starts the app in development mode</td>
+              </tr>
+              <tr>
+                <td><code>npm run build</code></td>
+                <td>Builds the TypeScript project for production</td>
+              </tr>
+              <tr>
+                <td><code>npm run lint</code></td>
+                <td>Runs lint checks for code quality</td>
+              </tr>
+              <tr>
+                <td><code>npm run test</code></td>
+                <td>Runs the test suite if configured</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="use-cases">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="kicker">Use cases</div>
+          <h2>Where this assistant delivers value</h2>
+          <p class="lead">This project is practical for internal enterprise workflows and not just a concept demo.</p>
+        </div>
+
+        <div class="grid grid-3">
+          <div class="card">
+            <h3>Executive meetings</h3>
+            <p>Captures decisions, owners, and next steps without relying on manual note-taking.</p>
+          </div>
+          <div class="card">
+            <h3>Project standups</h3>
+            <p>Keeps a record of blockers, decisions, and action items for faster accountability.</p>
+          </div>
+          <div class="card">
+            <h3>Client calls</h3>
+            <p>Preserves meeting context and automates follow-up summaries after stakeholder discussions.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="troubleshooting">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="kicker">Troubleshooting</div>
+          <h2>Common issues and fixes</h2>
+          <p class="lead">Use this section in your submission to show that the project is practical and implementation-aware.</p>
+        </div>
+
+        <div class="grid grid-2">
+          <div class="card">
+            <h3>App does not start</h3>
+            <ul>
+              <li>Check Node.js version compatibility</li>
+              <li>Run a clean install of dependencies</li>
+              <li>Verify TypeScript build errors</li>
+              <li>Confirm environment variables are present</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <h3>Teams integration issues</h3>
+            <ul>
+              <li>Verify Teams Toolkit configuration</li>
+              <li>Check manifest values and app IDs</li>
+              <li>Ensure app permissions are granted</li>
+              <li>Confirm tenant sign-in and consent are complete</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <h3>Email or calendar calls fail</h3>
+            <ul>
+              <li>Check Microsoft Graph scopes</li>
+              <li>Verify client secret and tenant settings</li>
+              <li>Confirm the correct signed-in identity is being used</li>
+            </ul>
+          </div>
+
+          <div class="card">
+            <h3>Meeting data is incomplete</h3>
+            <ul>
+              <li>Confirm meeting join flow is working</li>
+              <li>Check transcription or live context source</li>
+              <li>Make sure the meeting agent is receiving events correctly</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="submission">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="kicker">Submission notes</div>
+          <h2>What to highlight in your buildathon entry</h2>
+          <p class="lead">These are the strongest points to emphasize when judges review your repository and video.</p>
+        </div>
+
+        <div class="card">
+          <ul>
+            <li>This is a real multi-agent system, not a single prompt pretending to be one</li>
+            <li>The assistant uses Microsoft 365 integrations for practical enterprise workflows</li>
+            <li>It supports live contextual meeting questions while the meeting is still in progress</li>
+            <li>It produces structured minutes and automatically follows up afterward</li>
+            <li>It demonstrates clear end-to-end value from conversation to action</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      Built for a modern AI buildathon submission • TypeScript • Teams • Microsoft 365 • Multi-Agent Orchestration
+    </div>
+  </footer>
+</body>
+</html>
